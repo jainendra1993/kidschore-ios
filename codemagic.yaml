@@ -5,11 +5,11 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.dhiyohamkids.kids
+        bundle_identifier: com.dhiyohamkids.kids  # ✓ matches profile
       vars:
         XCODE_WORKSPACE: "ios/KidsChore.xcworkspace"
         XCODE_SCHEME: "KidsChore"
-        BUNDLE_ID: "com.dhiyohamkids.kids"
+        BUNDLE_ID: "com.dhiyohamkids.kids "
       node: 20.9.0
       xcode: latest
       cocoapods: default
@@ -30,7 +30,7 @@ workflows:
             --scheme "$XCODE_SCHEME" \
             --config Release
     artifacts:
-      - build/ios/ipa/*.ipa
+      - "*.ipa"                    # ✓ catches IPA wherever it's placed
       - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
