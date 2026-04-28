@@ -1,4 +1,4 @@
-package com.kidschore
+package com.dhiyohamkids.kids
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -19,6 +19,7 @@ class MainApplication : Application(), ReactApplication {
         },
     )
   }
+
 
   override fun onCreate() {
     super.onCreate()

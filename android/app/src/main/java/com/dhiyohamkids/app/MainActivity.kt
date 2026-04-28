@@ -1,4 +1,4 @@
-package com.kidschore
+package com.dhiyohamkids.kids
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
