@@ -7,11 +7,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>KidsChore</string>
+	<string>Dhiyoham Kids</string>
+	<key>NSCameraUsageDescription</key>
+    <string>We need camera access to upload photo proof of completed tasks</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need photo library access to upload task completion photos</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.dhiyohamkids.kids</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
