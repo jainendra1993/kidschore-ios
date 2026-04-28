@@ -5,7 +5,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.dhiyohamkids.app
+        bundle_identifier: com.dhiyohamkids.kids
       vars:
         XCODE_WORKSPACE: "ios/KidsChore.xcworkspace"
         XCODE_SCHEME: "KidsChore"
