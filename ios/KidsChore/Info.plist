@@ -9,9 +9,9 @@
 	<key>CFBundleDisplayName</key>
 	<string>Dhiyoham Kids</string>
 	<key>NSCameraUsageDescription</key>
-    <string>We need camera access to upload photo proof of completed tasks</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>We need photo library access to upload task completion photos</string>
+	<string>We need camera access to upload photo proof of completed tasks</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to upload task completion photos</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -32,7 +32,6 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<key>NSAllowsLocalNetworking</key>
@@ -61,3 +60,4 @@
 	<false/>
 </dict>
 </plist>
+

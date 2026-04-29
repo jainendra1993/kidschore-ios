@@ -17,21 +17,31 @@ workflows:
       - name: Install dependencies
         script: |
           npm install
+
       - name: Install CocoaPods
         script: |
           cd ios && pod install
+
       - name: Set up code signing
         script: |
           xcode-project use-profiles
+
+      - name: Fix bundle ID
+        script: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dhiyohamkids.kids" ios/KidsChore/Info.plist
+
       - name: Build iOS
         script: |
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --config Release
+            --config Release \
+            --provisioning-profile-name "dhiyoham_profile"
+
     artifacts:
       - "*.ipa"
       - /tmp/xcodebuild_logs/*.log
+
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
