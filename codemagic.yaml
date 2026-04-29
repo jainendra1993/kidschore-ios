@@ -10,6 +10,7 @@ workflows:
         XCODE_WORKSPACE: "ios/KidsChore.xcworkspace"
         XCODE_SCHEME: "KidsChore"
         BUNDLE_ID: "com.dhiyohamkids.kids"
+        RCT_NEW_ARCH_ENABLED: "0"
       node: 20.9.0
       xcode: 16.3
       cocoapods: default
@@ -21,14 +22,6 @@ workflows:
       - name: Install CocoaPods
         script: |
           cd ios && pod install
-
-      - name: Fix gRPC modulemap
-        script: |
-          GRPC_DIR="ios/Pods/Headers/Private/grpc"
-          mkdir -p "$GRPC_DIR"
-          if [ ! -f "$GRPC_DIR/gRPC-Core.modulemap" ]; then
-            echo 'framework module gRPC_Core { }' > "$GRPC_DIR/gRPC-Core.modulemap"
-          fi
 
       - name: Set up code signing
         script: |
@@ -43,7 +36,8 @@ workflows:
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --config Release
+            --config Release \
+            --xcarg "RCT_NEW_ARCH_ENABLED=0"
 
     artifacts:
       - "*.ipa"
