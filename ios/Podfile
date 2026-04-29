@@ -32,13 +32,5 @@ target 'KidsChore' do
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       end
     end
-
-    # Fix gRPC-Core modulemap missing on clean builds
-    grpc_core_dir = File.join(installer.sandbox.root, 'Headers', 'Private', 'grpc')
-    FileUtils.mkdir_p(grpc_core_dir)
-    modulemap_file = File.join(grpc_core_dir, 'gRPC-Core.modulemap')
-    unless File.exist?(modulemap_file)
-      File.write(modulemap_file, 'framework module gRPC_Core { }')
-    end
   end
 end

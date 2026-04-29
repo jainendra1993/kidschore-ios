@@ -24,6 +24,13 @@ workflows:
           export RCT_NEW_ARCH_ENABLED=0
           cd ios && pod install
 
+      - name: Fix gRPC modulemap
+        script: |
+          mkdir -p ios/Pods/Headers/Private/grpc
+          echo 'framework module gRPC_Core { }' > ios/Pods/Headers/Private/grpc/gRPC-Core.modulemap
+          echo "Created modulemap:"
+          cat ios/Pods/Headers/Private/grpc/gRPC-Core.modulemap
+
       - name: Set up code signing
         script: |
           xcode-project use-profiles
