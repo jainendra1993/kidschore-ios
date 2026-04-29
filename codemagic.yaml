@@ -35,8 +35,7 @@ workflows:
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --config Release \
-            --provisioning-profile-name "dhiyoham_profile"
+            --config Release
 
     artifacts:
       - "*.ipa"
