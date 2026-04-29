@@ -11,7 +11,7 @@ workflows:
         XCODE_SCHEME: "KidsChore"
         BUNDLE_ID: "com.dhiyohamkids.kids"
       node: 20.9.0
-      xcode: latest
+      xcode: 16.3
       cocoapods: default
     scripts:
       - name: Install dependencies
@@ -29,8 +29,6 @@ workflows:
           if [ ! -f "$GRPC_DIR/gRPC-Core.modulemap" ]; then
             echo 'framework module gRPC_Core { }' > "$GRPC_DIR/gRPC-Core.modulemap"
           fi
-          echo "gRPC modulemap created at $GRPC_DIR"
-          ls -la "$GRPC_DIR"
 
       - name: Set up code signing
         script: |
