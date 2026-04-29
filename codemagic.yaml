@@ -21,6 +21,7 @@ workflows:
 
       - name: Install CocoaPods
         script: |
+          export RCT_NEW_ARCH_ENABLED=0
           cd ios && pod install
 
       - name: Set up code signing
@@ -36,8 +37,7 @@ workflows:
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --config Release \
-            --xcarg "RCT_NEW_ARCH_ENABLED=0"
+            --config Release
 
     artifacts:
       - "*.ipa"
