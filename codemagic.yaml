@@ -22,6 +22,16 @@ workflows:
         script: |
           cd ios && pod install
 
+      - name: Fix gRPC modulemap
+        script: |
+          GRPC_DIR="ios/Pods/Headers/Private/grpc"
+          mkdir -p "$GRPC_DIR"
+          if [ ! -f "$GRPC_DIR/gRPC-Core.modulemap" ]; then
+            echo 'framework module gRPC_Core { }' > "$GRPC_DIR/gRPC-Core.modulemap"
+          fi
+          echo "gRPC modulemap created at $GRPC_DIR"
+          ls -la "$GRPC_DIR"
+
       - name: Set up code signing
         script: |
           xcode-project use-profiles
