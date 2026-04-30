@@ -12,7 +12,7 @@ workflows:
         BUNDLE_ID: "com.dhiyohamkids.kids"
         RCT_NEW_ARCH_ENABLED: "0"
       node: 20.9.0
-      xcode: 15.4        # ← Downgraded from 16.3, critical fix
+      xcode: 16.2        # ← Downgraded from 16.3, critical fix
       cocoapods: 1.15.2  # ← Pinned, no more version drift
     scripts:
       - name: Install node dependencies
