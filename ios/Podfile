@@ -23,6 +23,8 @@ target 'KidsChore' do
   pod 'FirebaseMessagingInterop',   :modular_headers => true
   pod 'FirebaseFirestoreInternal',  :modular_headers => true
   pod 'RecaptchaInterop',           :modular_headers => true
+  pod 'FirebaseAuth',             :modular_headers => true
+  pod 'FirebaseSharedSwift',      :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
