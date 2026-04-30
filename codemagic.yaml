@@ -12,24 +12,22 @@ workflows:
         BUNDLE_ID: "com.dhiyohamkids.kids"
         RCT_NEW_ARCH_ENABLED: "0"
       node: 20.9.0
-      xcode: 16.3
-      cocoapods: default
+      xcode: 15.4        # ← Downgraded from 16.3, critical fix
+      cocoapods: 1.15.2  # ← Pinned, no more version drift
     scripts:
-      - name: Install dependencies
+      - name: Install node dependencies
         script: |
           npm install
 
-      - name: Install CocoaPods
+      - name: Clean and install CocoaPods
         script: |
           export RCT_NEW_ARCH_ENABLED=0
-          cd ios && pod install
-
-      - name: Fix gRPC modulemap
-        script: |
-          mkdir -p ios/Pods/Headers/Private/grpc
-          echo 'framework module gRPC_Core { }' > ios/Pods/Headers/Private/grpc/gRPC-Core.modulemap
-          echo "Created modulemap:"
-          cat ios/Pods/Headers/Private/grpc/gRPC-Core.modulemap
+          cd ios
+          rm -rf Pods
+          rm -f Podfile.lock
+          pod cache clean --all
+          pod install --repo-update
+          cd ..
 
       - name: Set up code signing
         script: |
@@ -41,14 +39,17 @@ workflows:
 
       - name: Build iOS
         script: |
+          export RCT_NEW_ARCH_ENABLED=0
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --config Release
+            --config Release \
+            --xcode-build-args "COMPILER_INDEX_STORE_ENABLE=NO"
 
     artifacts:
-      - "*.ipa"
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
 
     publishing:
       app_store_connect:
