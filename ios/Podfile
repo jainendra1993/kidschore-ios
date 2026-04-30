@@ -10,7 +10,6 @@ prepare_react_native_project!
 target 'KidsChore' do
   config = use_native_modules!
 
-  # Firebase pods that need modular headers
   pod 'GoogleUtilities',            :modular_headers => true
   pod 'FirebaseCore',               :modular_headers => true
   pod 'FirebaseCoreInternal',       :modular_headers => true
@@ -23,8 +22,6 @@ target 'KidsChore' do
   pod 'FirebaseMessagingInterop',   :modular_headers => true
   pod 'FirebaseFirestoreInternal',  :modular_headers => true
   pod 'RecaptchaInterop',           :modular_headers => true
-  pod 'FirebaseAuth',             :modular_headers => true
-  pod 'FirebaseSharedSwift',      :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
@@ -46,12 +43,8 @@ target 'KidsChore' do
         end
         config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-      end
-    end
 
-    installer.pods_project.targets.each do |target|
-      if target.name == 'RNFBApp'
-        target.build_configurations.each do |config|
+        if target.name.start_with?('RNFB')
           config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
           config.build_settings['OTHER_CFLAGS'] = '$(inherited) -fno-modules'
         end
