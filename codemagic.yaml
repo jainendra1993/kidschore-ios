@@ -12,8 +12,8 @@ workflows:
         BUNDLE_ID: "com.dhiyohamkids.kids"
         RCT_NEW_ARCH_ENABLED: "0"
       node: 20.9.0
-      xcode: 16.2        # ← Downgraded from 16.3, critical fix
-      cocoapods: 1.15.2  # ← Pinned, no more version drift
+      xcode: 16.2
+      cocoapods: 1.15.2
     scripts:
       - name: Install node dependencies
         script: |
@@ -26,9 +26,20 @@ workflows:
           rm -rf Pods
           rm -f Podfile.lock
           pod cache clean --all
-          pod install --repo-update
-          echo "→ Checking workspace exists:"
-          ls -la KidsChore.xcworkspace || echo "ERROR: xcworkspace not created!"
+          echo "=== Starting pod install ==="
+          pod install --repo-update 2>&1 | tee /tmp/pod_install.log
+          POD_EXIT=${PIPESTATUS[0]}
+          echo "=== Pod install exit code: $POD_EXIT ==="
+          echo "=== Directory listing ==="
+          ls -la
+          if [ ! -d "KidsChore.xcworkspace" ]; then
+            echo "ERROR: xcworkspace was NOT created!"
+            echo "=== Last 50 lines of pod log ==="
+            tail -50 /tmp/pod_install.log
+            exit 1
+          else
+            echo "SUCCESS: xcworkspace created!"
+          fi
           cd ..
 
       - name: Set up code signing
@@ -42,7 +53,6 @@ workflows:
       - name: Build iOS
         script: |
           export RCT_NEW_ARCH_ENABLED=0
-          cd ios && ls -la && cd ..
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
@@ -52,6 +62,7 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - /tmp/pod_install.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
 
     publishing:
