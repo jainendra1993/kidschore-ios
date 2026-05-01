@@ -19,7 +19,7 @@ target 'KidsChore' do
   pod 'nanopb',                     :modular_headers => true
   pod 'FirebaseInstallations',      :modular_headers => true
   pod 'FirebaseAppCheckInterop',    :modular_headers => true
-  pod 'FirebaseAuthInterop',        :modular_headers => true  # ⭐ ADDED - CRITICAL
+  pod 'FirebaseAuthInterop',        :modular_headers => true
   pod 'FirebaseMessagingInterop',   :modular_headers => true
   pod 'FirebaseFirestoreInternal',  :modular_headers => true
   pod 'RecaptchaInterop',           :modular_headers => true
@@ -58,6 +58,7 @@ target 'KidsChore' do
       end
     end
 
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
+    # Removed: __apply_Xcode_12_5_M1_post_install_workaround(installer)
+    # This function doesn't exist in CocoaPods 1.15.2
   end
 end
