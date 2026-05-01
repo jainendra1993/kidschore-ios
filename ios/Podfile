@@ -10,13 +10,18 @@ prepare_react_native_project!
 target 'KidsChore' do
   config = use_native_modules!
 
-  # Firebase pods with explicit modular_headers
+  # Firebase pods with explicit modular_headers - ORDER MATTERS!
+  # Dependencies first, then dependents
   pod 'GoogleUtilities',            :modular_headers => true
+  pod 'GoogleDataTransport',        :modular_headers => true
+  pod 'nanopb',                     :modular_headers => true
+
+  # Core Firebase
   pod 'FirebaseCore',               :modular_headers => true
   pod 'FirebaseCoreInternal',       :modular_headers => true
   pod 'FirebaseCoreExtension',      :modular_headers => true
-  pod 'GoogleDataTransport',        :modular_headers => true
-  pod 'nanopb',                     :modular_headers => true
+
+  # Firebase Services
   pod 'FirebaseInstallations',      :modular_headers => true
   pod 'FirebaseAppCheckInterop',    :modular_headers => true
   pod 'FirebaseAuthInterop',        :modular_headers => true
@@ -37,28 +42,44 @@ target 'KidsChore' do
       :mac_catalyst_enabled => false,
     )
 
+    # Configure all pods
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
+
+        # ========== UNIVERSAL SETTINGS ==========
         # Set minimum deployment target
         if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 15.1
           config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
         end
 
-        # Critical for Release builds with Firebase
+        # Critical for Release builds
         config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
         config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+        config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
 
-        # Firebase specific settings
+        # Enable explicit modules for Swift
+        config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'YES'
+
+        # ========== FIREBASE-SPECIFIC SETTINGS ==========
         if target.name.start_with?('RNFB') || target.name.include?('Firebase')
           config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
           config.build_settings['ENABLE_BITCODE'] = 'NO'
-          config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
+        end
+
+        # ========== GOOGLE UTILITIES & DEPENDENCIES ==========
+        if target.name.include?('GoogleUtilities') ||
+           target.name.include?('GoogleDataTransport') ||
+           target.name.include?('FirebaseCore')
+          config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
+          config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'YES'
+        end
+
+        # ========== LOTTIE FIX ==========
+        if target.name.include?('lottie')
+          config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
         end
       end
     end
-
-    # Removed: __apply_Xcode_12_5_M1_post_install_workaround(installer)
-    # This function doesn't exist in CocoaPods 1.15.2
   end
 end
