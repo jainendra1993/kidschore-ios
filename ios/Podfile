@@ -10,6 +10,7 @@ prepare_react_native_project!
 target 'KidsChore' do
   config = use_native_modules!
 
+  # Firebase pods with explicit modular_headers
   pod 'GoogleUtilities',            :modular_headers => true
   pod 'FirebaseCore',               :modular_headers => true
   pod 'FirebaseCoreInternal',       :modular_headers => true
@@ -18,6 +19,7 @@ target 'KidsChore' do
   pod 'nanopb',                     :modular_headers => true
   pod 'FirebaseInstallations',      :modular_headers => true
   pod 'FirebaseAppCheckInterop',    :modular_headers => true
+  pod 'FirebaseAuthInterop',        :modular_headers => true  # ⭐ ADDED - CRITICAL
   pod 'FirebaseMessagingInterop',   :modular_headers => true
   pod 'FirebaseFirestoreInternal',  :modular_headers => true
   pod 'RecaptchaInterop',           :modular_headers => true
