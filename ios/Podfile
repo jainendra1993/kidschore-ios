@@ -15,9 +15,9 @@ target 'KidsChore' do
   pod 'GoogleDataTransport',        :modular_headers => true
   pod 'nanopb',                     :modular_headers => true
 
-  # Core Firebase - depends on GoogleUtilities
+  # Core Firebase
   pod 'FirebaseCore',               :modular_headers => true
-  pod 'FirebaseCoreInternal',       :modular_headers => true, :dependencies => { 'GoogleUtilities' => [] }
+  pod 'FirebaseCoreInternal',       :modular_headers => true
   pod 'FirebaseCoreExtension',      :modular_headers => true
 
   # Firebase Services
@@ -41,49 +41,35 @@ target 'KidsChore' do
       :mac_catalyst_enabled => false,
     )
 
-    # Configure all pods
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
 
-        # ========== UNIVERSAL SETTINGS ==========
         if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 15.1
           config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
         end
 
-        # Critical for Release builds with proper module support
         config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
         config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
         config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
-
-        # Enable explicit modules - CRITICAL FOR SWIFT MODULE RESOLUTION
         config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'YES'
         config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
         config.build_settings['ENABLE_OBJC_MODULES'] = 'YES'
-
-        # Swift-specific settings
         config.build_settings['SWIFT_VERSION'] = '5.9'
 
-        # ========== FIREBASE-SPECIFIC SETTINGS ==========
         if target.name.start_with?('RNFB') || target.name.include?('Firebase')
           config.build_settings['ENABLE_BITCODE'] = 'NO'
-          config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'YES'
-          config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
         end
 
-        # ========== CORE DEPENDENCIES ==========
-        # These MUST be able to find GoogleUtilities
         if target.name == 'FirebaseCoreInternal' ||
            target.name == 'FirebaseCore' ||
            target.name == 'GoogleUtilities'
-          config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
-          config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'YES'
           config.build_settings['OTHER_SWIFT_FLAGS'] = '$(inherited) -suppress-warnings'
         end
       end
     end
 
-    # Force correct build order - ensure GoogleUtilities is built first
+    # Force correct build order
     installer.pods_project.targets.each do |target|
       if target.name == 'FirebaseCoreInternal'
         google_utilities_target = installer.pods_project.targets.find { |t| t.name == 'GoogleUtilities' }
