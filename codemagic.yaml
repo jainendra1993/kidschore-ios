@@ -34,6 +34,21 @@ workflows:
           ls -la KidsChore.xcworkspace
           cd ..
 
+      - name: Fix Swift Module Interface Issues  # ✅ ADD THIS NEW SCRIPT
+        script: |
+          echo "🔧 Fixing Swift module interface issues..."
+          cd ios
+
+          # Clean derived data
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+
+          # Update pod specs
+          pod repo update
+          pod install --repo-update
+
+          cd ..
+          echo "✅ Swift issues fixed"
+
       - name: Configure code signing
         script: |
           echo "🔑 Configuring code signing..."
