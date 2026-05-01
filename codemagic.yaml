@@ -13,54 +13,104 @@ workflows:
       node: 20.9.0
       xcode: 16.2
       cocoapods: 1.15.2
+
     scripts:
       - name: Install node dependencies
         script: |
+          echo "📦 Installing npm dependencies..."
           npm install
+          echo "✅ npm install completed"
 
-      - name: Clean and install CocoaPods
+      - name: Clean and Reset CocoaPods
         script: |
           cd ios
+          echo "🧹 Removing old Pods directory..."
           rm -rf Pods
+          echo "🧹 Removing old Podfile.lock..."
           rm -f Podfile.lock
+          echo "🧹 Cleaning pod cache..."
           pod cache clean --all
-          echo "=== Starting pod install ==="
-          pod install --repo-update 2>&1 | tee /tmp/pod_install.log
-          POD_EXIT=${PIPESTATUS[0]}
-          echo "=== Pod install exit code: $POD_EXIT ==="
-          echo "=== Directory listing ==="
-          ls -la
+          echo "🔄 Updating pod repo..."
+          pod repo update
+          cd ..
+          echo "✅ Cleanup completed"
+
+      - name: Install CocoaPods Dependencies
+        script: |
+          cd ios
+          echo "📦 Running pod install --repo-update..."
+          pod install --repo-update
+          
+          # Check if xcworkspace was created
           if [ ! -d "KidsChore.xcworkspace" ]; then
-            echo "ERROR: xcworkspace was NOT created!"
-            echo "=== Last 50 lines of pod log ==="
-            tail -50 /tmp/pod_install.log
+            echo "❌ FATAL ERROR: KidsChore.xcworkspace NOT created!"
+            echo "Directory contents:"
+            ls -la
             exit 1
-          else
-            echo "SUCCESS: xcworkspace created!"
           fi
+          
+          echo "✅ xcworkspace created successfully"
           cd ..
 
       - name: Set up code signing
         script: |
+          echo "🔑 Setting up code signing profiles..."
           xcode-project use-profiles
+          echo "✅ Code signing configured"
 
-      - name: Fix bundle ID
+      - name: Update Bundle ID
         script: |
+          echo "📝 Updating bundle ID..."
           /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dhiyohamkids.kids" ios/KidsChore/Info.plist
+          echo "✅ Bundle ID updated"
 
-      - name: Build iOS
+      - name: Build iOS App
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME" \
-            --config Release \
-            --archive-xcargs "COMPILER_INDEX_STORE_ENABLE=NO"
+          cd ios
+          echo "🔨 Starting iOS build..."
+          
+          xcodebuild \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -config Release \
+            -archivePath "$HOME/build_archive.xcarchive" \
+            -derivedDataPath build/DerivedData \
+            -verbose \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            archive
+          
+          BUILD_EXIT=$?
+          
+          if [ $BUILD_EXIT -eq 0 ]; then
+            echo "✅ Build successful!"
+          else
+            echo "❌ Build failed with exit code: $BUILD_EXIT"
+            exit 1
+          fi
+          
+          cd ..
+
+      - name: Export IPA
+        script: |
+          echo "📦 Exporting IPA..."
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$HOME/build_archive.xcarchive" \
+            -exportPath "$HOME/ipa" \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates
+          
+          echo "✅ IPA exported"
+
+      - name: Copy IPA to artifacts
+        script: |
+          echo "📁 Copying IPA to artifacts..."
+          mkdir -p build/ios/ipa
+          cp $HOME/ipa/KidsChore.ipa build/ios/ipa/KidsChore.ipa
+          echo "✅ IPA ready for upload"
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-      - /tmp/pod_install.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
 
     publishing:
       app_store_connect:
