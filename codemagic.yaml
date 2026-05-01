@@ -21,23 +21,24 @@ workflows:
           npm install
           echo "✅ npm install done"
 
-      - name: Clean Previous Build
-        script: |
-          echo "🧹 Cleaning previous build artifacts..."
-          rm -rf ios/Pods
-          rm -f ios/Podfile.lock
-          rm -rf ~/Library/Developer/Xcode/DerivedData/*
-          echo "✅ Cleanup done"
-
       - name: Install CocoaPods
         script: |
           echo "📦 Installing CocoaPods dependencies..."
           cd ios
+          rm -rf Pods
+          rm -f Podfile.lock
           pod cache clean --all
           pod repo update
           pod install --repo-update
           echo "✅ Pod install completed"
-          ls -la KidsChore.xcworkspace
+          
+          # Verify workspace was created
+          if [ ! -d "KidsChore.xcworkspace" ]; then
+            echo "❌ ERROR: KidsChore.xcworkspace NOT created!"
+            ls -la
+            exit 1
+          fi
+          echo "✅ Workspace verified"
           cd ..
 
       - name: Configure code signing
@@ -52,27 +53,58 @@ workflows:
           /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dhiyohamkids.kids" ios/KidsChore/Info.plist
           echo "✅ Bundle ID updated"
 
-      - name: Build and Export IPA
+      - name: Build and Archive
         script: |
           echo "🔨 Building iOS app..."
-          xcode-project build-ipa \
-            --workspace "ios/KidsChore.xcworkspace" \
-            --scheme "KidsChore" \
-            --config Release \
-            --archive-xcargs "COMPILER_INDEX_STORE_ENABLE=NO SWIFT_VERSION=5.9 OTHER_SWIFT_FLAGS='-suppress-warnings'" \
-            --export-options "ios/ExportOptions.plist"
           
-          echo "✅ Build completed"
+          # Make absolutely sure we're in the right directory
+          pwd
+          ls -la ios/KidsChore.xcworkspace 2>/dev/null || echo "⚠️  Workspace not found, but continuing..."
+          
+          # Use direct xcodebuild instead of xcode-project wrapper
+          xcodebuild \
+            -workspace ios/KidsChore.xcworkspace \
+            -scheme KidsChore \
+            -configuration Release \
+            -archivePath build/ios/KidsChore.xcarchive \
+            -derivedDataPath build/ios/DerivedData \
+            archive \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            DEVELOPMENT_TEAM=FA396FMRZZ \
+            CODE_SIGN_STYLE=Manual
+          
+          ARCHIVE_EXIT=$?
+          
+          if [ $ARCHIVE_EXIT -eq 0 ]; then
+            echo "✅ Archive successful!"
+          else
+            echo "❌ Archive failed with exit code: $ARCHIVE_EXIT"
+            exit 1
+          fi
 
-      - name: Copy IPA to artifacts
+      - name: Export IPA
         script: |
-          mkdir -p build/ios/ipa
-          find . -name "*.ipa" -exec cp {} build/ios/ipa/ \;
-          ls -la build/ios/ipa/
+          echo "📦 Exporting IPA..."
+          
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/ios/KidsChore.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates
+          
+          EXPORT_EXIT=$?
+          
+          if [ $EXPORT_EXIT -eq 0 ]; then
+            echo "✅ IPA exported successfully"
+            ls -lh build/ios/ipa/KidsChore.ipa
+          else
+            echo "❌ IPA export failed with exit code: $EXPORT_EXIT"
+            exit 1
+          fi
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - /tmp/*.log
 
     publishing:
       app_store_connect:
